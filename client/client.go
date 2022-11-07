@@ -15,19 +15,26 @@ type Cotacao struct {
 func main() {
 	resp, err := http.Get("http://localhost:8080/cotacao")
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Cannot request endpoint: %v\n", err)
 	}
+
+	if resp.StatusCode == http.StatusRequestTimeout {
+		fmt.Fprintf(os.Stderr, "Request timeout\n")
+		return
+	}
+
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Cannot read response body: %v\n", err)
 	}
 
 	var cotacao Cotacao
 	err = json.Unmarshal(body, &cotacao)
 	if err != nil {
-		println(err)
+		fmt.Fprintf(os.Stderr, "Cannot unmarshal response to struct: %v\n", err)
+		return
 	}
 
 	file, err := os.Create("cotacao.txt")
