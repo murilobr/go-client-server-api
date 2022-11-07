@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 )
 
 type Cotacao struct {
@@ -29,5 +30,14 @@ func main() {
 		println(err)
 	}
 
-	fmt.Println(cotacao.Value)
+	file, err := os.Create("cotacao.txt")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao criar o arquivo cotacao.txt: %v\n", err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(fmt.Sprintf("Dólar: %s", cotacao.Value))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao escrever no arquivo cotacao.txt: %v\n", err)
+	}
 }
