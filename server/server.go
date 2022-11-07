@@ -54,7 +54,6 @@ func GetExchangeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Request error: %v\n", err)
 		w.WriteHeader(http.StatusRequestTimeout)
-		w.Write([]byte(""))
 		return
 	}
 	defer res.Body.Close()
