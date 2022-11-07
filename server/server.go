@@ -26,30 +26,37 @@ type Currency struct {
 	CreateDate string `json:"create_date"`
 }
 
+type Cotacao struct {
+	Value string `json:"value"`
+}
+
 func main() {
 	http.HandleFunc("/cotacao", GetExchangeHandler)
 	http.ListenAndServe(":8080", nil)
 }
 
 func GetExchangeHandler(w http.ResponseWriter, r *http.Request) {
-	req, err := http.Get("https://economia.awesomeapi.com.br/json/last/USD-BRL")
+	res, err := http.Get("https://economia.awesomeapi.com.br/json/last/USD-BRL")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Request error: %v\n", err)
 	}
-	defer req.Body.Close()
+	defer res.Body.Close()
 
-	res, err := io.ReadAll(req.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Response error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Response body read error: %v\n", err)
 	}
 
 	var data USDBRL
-	err = json.Unmarshal(res, &data)
+	err = json.Unmarshal(body, &data)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Parse error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Unmarshal error: %v\n", err)
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(data.USDBRL.Bid))
+
+	cotacao := Cotacao{Value: data.USDBRL.Bid}
+
+	json.NewEncoder(w).Encode(cotacao)
 }
