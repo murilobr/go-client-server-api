@@ -22,7 +22,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	resp.Body.Close()
 
 	var cotacao Cotacao
 	err = json.Unmarshal(body, &cotacao)
