@@ -42,7 +42,7 @@ func main() {
 
 func GetExchangeHandler(w http.ResponseWriter, r *http.Request) {
 	ctxReq := context.Background()
-	ctxReq, cancelCtxReq := context.WithTimeout(ctxReq, time.Millisecond*10)
+	ctxReq, cancelCtxReq := context.WithTimeout(ctxReq, time.Millisecond*200)
 	defer cancelCtxReq()
 
 	req, err := http.NewRequestWithContext(ctxReq, "GET", "https://economia.awesomeapi.com.br/json/last/USD-BRL", nil)
