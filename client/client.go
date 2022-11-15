@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 type Cotacao struct {
@@ -13,19 +15,28 @@ type Cotacao struct {
 }
 
 func main() {
-	resp, err := http.Get("http://localhost:8080/cotacao")
+	ctxReq := context.Background()
+	ctxReq, cancelCtxReq := context.WithTimeout(ctxReq, time.Millisecond*300)
+	defer cancelCtxReq()
+
+	req, err := http.NewRequestWithContext(ctxReq, "GET", "http://localhost:8080/cotacao", nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot request endpoint: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Create new request error: %v\n", err)
 	}
 
-	if resp.StatusCode == http.StatusRequestTimeout {
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Request error: %v\n", err)
+		return
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusRequestTimeout {
 		fmt.Fprintf(os.Stderr, "Request timeout\n")
 		return
 	}
 
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read response body: %v\n", err)
 	}
